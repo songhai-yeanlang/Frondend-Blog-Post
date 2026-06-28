@@ -47,6 +47,11 @@ const router = createRouter({
       component: () => import('@/views/dashboard/PostDetail.vue'),
     },
     {
+      path: '/profile',
+      name: 'profile',
+      component: () => import('@/views/dashboard/Profile.vue'),
+    },
+    {
       path: '/verify-email',
       name: 'verify-email',
       component: VerifyEmail,

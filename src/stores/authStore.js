@@ -1,26 +1,53 @@
-import { defineStore } from "pinia";
-import { ref } from "vue";
+import { defineStore } from 'pinia'
+import { ref } from 'vue'
+import { getMyProfile } from '@/api/profile.api'
 
-export const useAuthStore = defineStore("auth", () => {
-  const token = ref(localStorage.getItem("token") || null);
-  const user = ref(JSON.parse(localStorage.getItem("user") || "null"));
+export const useAuthStore = defineStore('auth', () => {
+  // ─── State ────────────────────────────────────────────────────────────────
+  const token = ref(localStorage.getItem('token') || null)
+  const user  = ref(JSON.parse(localStorage.getItem('user') || 'null'))
 
+  // ─── Mutations ────────────────────────────────────────────────────────────
   const setToken = (newToken) => {
-    token.value = newToken;
-    localStorage.setItem("token", newToken);
-  };
+    token.value = newToken
+    localStorage.setItem('token', newToken)
+  }
 
   const setUser = (newUser) => {
-    user.value = newUser;
-    localStorage.setItem("user", JSON.stringify(newUser));
-  };
+    user.value = newUser
+    localStorage.setItem('user', JSON.stringify(newUser))
+  }
 
   const logout = () => {
-    token.value = null;
-    user.value = null;
-    localStorage.removeItem("token");
-    localStorage.removeItem("user");
-  };
+    token.value = null
+    user.value  = null
+    localStorage.removeItem('token')
+    localStorage.removeItem('user')
+  }
 
-  return { token, user, setToken, setUser, logout };
-});
+  // ─── Actions ──────────────────────────────────────────────────────────────
+  /**
+   * Fetch the authenticated user's profile from the server and sync it to the
+   * store + localStorage. Logs the user out if the token is invalid / expired.
+   */
+  const fetchProfile = async () => {
+    if (!token.value) return
+
+    try {
+      const { data } = await getMyProfile()
+      setUser(data.data)
+    } catch (err) {
+      const status  = err?.response?.status
+      const message = err?.response?.data?.message ?? err.message
+      console.warn('[AuthStore] fetchProfile failed:', message)
+
+      // Only clear the session when the token is actually rejected by the server.
+      // Network errors, 500s, etc. should NOT log the user out.
+      if (status === 401) {
+        logout()
+      }
+    }
+  }
+
+  return { token, user, setToken, setUser, logout, fetchProfile }
+})

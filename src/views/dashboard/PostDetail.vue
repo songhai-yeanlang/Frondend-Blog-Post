@@ -89,28 +89,12 @@
           </button>
           
           <!-- Header Logout/Login Actions -->
-          <button
-            v-if="authStore.token"
-            @click="handleLogout"
-            class="w-9 h-9 rounded-full flex items-center justify-center text-gray-500 hover:bg-red-50 hover:text-red-500 transition-colors cursor-pointer border-none bg-transparent"
-            title="Logout"
-          >
-            <span class="material-symbols-outlined text-[22px]">logout</span>
-          </button>
+       
+    
 
-          <router-link
-            v-else
-            to="/"
-            class="flex items-center gap-1 px-3 py-1 rounded-full border border-primary text-primary hover:bg-primary hover:text-white transition-all text-xs font-semibold no-underline"
-          >
-            <span class="material-symbols-outlined text-[16px]">login</span>
-            <span>Login</span>
-          </router-link>
-
-
-          <div class="flex items-center gap-2 pl-3 ml-1 border-l border-gray-200 cursor-pointer hover:opacity-80 transition-opacity">
+          <router-link to="/profile" class="flex items-center gap-2 pl-3 ml-1 border-l border-gray-200 cursor-pointer hover:opacity-80 transition-opacity">
             <img
-              :src="authStore.user ? resolveAvatarUrl(authStore.user.avatar) : fallbackAvatar"
+              :src="resolveAvatarUrl(authStore.user?.avatar, authStore.user?.name)"
               alt="avatar"
               class="w-8 h-8 rounded-full object-cover border border-gray-200"
             />
@@ -118,7 +102,7 @@
               {{ authStore.user ? authStore.user.name : 'Mr. Jhone' }}
             </span>
             <span class="material-symbols-outlined text-[18px] text-gray-400">arrow_drop_down</span>
-          </div>
+          </router-link>
         </div>
       </header>
 
@@ -217,6 +201,7 @@ import api from '@/api/api'
 import { useAuthStore } from '@/stores/authStore'
 import PostDetailCard from '@/components/dashboard/PostDetailCard.vue'
 import ConfirmModal from '@/components/ConfirmModal.vue'
+import { resolveAvatarUrl } from '@/utils/avatar'
 
 const route = useRoute()
 const router = useRouter()
@@ -225,7 +210,7 @@ const authStore = useAuthStore()
 const showLogoutModal = ref(false)
 const logoutLoading = ref(false)
 
-const fallbackAvatar = 'https://lh3.googleusercontent.com/aida-public/AB6AXuDAyLRiasBAeOfjtCdv6oM872vG_LoVogCFSXq5t1Yb98G74kUAXVnFPMkaK_KocJNKRxhE9mC9zvM3yWrmEdkg0GYo4NFwhF0de0FZLmew0tC4m6Owd4Kx6q7syraOWujw7yqQoBT6OuMF_Y0TNXo-okHcivApgWzvxpoY8i3Bgjm8CGHpz-cyvsmBMFCooxOnn8ur1SypMRRHUeaC5fXK_Qbh7zVLGHcAmHCiEl_uAVnW4qnJ0jJGs8yRk_ZtiBQPlpaty2YrvC8'
+// fallbackAvatar is now handled inside resolveAvatarUrl (src/utils/avatar.js)
 
 const isMobileMenuOpen = ref(false)
 const isLoading = ref(false)
@@ -258,12 +243,7 @@ const confirmLogout = async () => {
   router.push('/')
 }
 
-const resolveAvatarUrl = (path) => {
-  if (!path) return ''
-  if (path.startsWith('http://') || path.startsWith('https://')) return path
-  const base = import.meta.env.VITE_API_BASE_URL?.replace('/api', '') || ''
-  return `${base}${path}`
-}
+// resolveAvatarUrl is imported from @/utils/avatar
 
 const loadPost = async () => {
   isLoading.value = true
